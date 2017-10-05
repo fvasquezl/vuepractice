@@ -8,7 +8,7 @@
                     <div class="panel-heading">Dashboard</div>
 
                     <div class="panel-body">
-
+                        <data-viewer source="/api/user" title="User Data"/>
                     </div>
                 </div>
             </div>

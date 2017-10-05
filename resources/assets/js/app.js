@@ -16,6 +16,7 @@ window.Vue = require('vue');
  */
 
 Vue.component('example', require('./components/Example.vue'));
+Vue.component('DataViewer', require('./components/DataViewer.vue'));
 
 const app = new Vue({
     el: '#app'
