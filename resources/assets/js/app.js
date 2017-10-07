@@ -4,7 +4,7 @@
  * includes Vue and other libraries. It is a great starting point when
  * building robust, powerful web applications using Vue and Laravel.
  */
-
+import Router from './routes.js'
 require('./bootstrap');
 
 window.Vue = require('vue');
@@ -17,7 +17,9 @@ window.Vue = require('vue');
 
 Vue.component('example', require('./components/Example.vue'));
 Vue.component('DataViewer', require('./components/DataViewer.vue'));
+Vue.component('App', require('./components/App.vue'));
 
 const app = new Vue({
-    el: '#app'
+    el: '#app',
+    router: Router
 });

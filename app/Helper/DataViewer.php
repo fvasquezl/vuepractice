@@ -32,19 +32,6 @@ trait DataViewer
             ]);
 
 
-//        if ($validator->fails()) {
-//            $validator->messages();
-//        }
-
-//        if($request->search_operator=='in'){
-//            $query->whereIn($request->search_column, explode(',',$request->search_input));
-//        }else if($request->search_operator == 'like'){
-//            $query->where($request->search_column, 'LIKE', '%'.$request->search_input.'%');
-//        }else{
-//            $query->where($request->search_column, $this->operators[$request->search_operator], $request->search_input);
-//        }
-
-
         return $query
             ->orderBy($request->column,$request->direction)
             ->where(function($query) use ($request) {

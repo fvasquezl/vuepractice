@@ -11,10 +11,19 @@
 |
 */
 
-Route::get('/','UserController@index');
+Route::get('/',function (){
+    return view('home');
+});
 
+
+Route::get('/user','UserController@index');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('api/user','UserController@getData');
+
+Route::group(['prefix' => 'api/'], function(){
+    Route::resource('customer','CustomerController');
+    Route::resource('invoice','InvoiceController');
+});
