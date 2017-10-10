@@ -1,143 +1,166 @@
 <template>
-      <div class="dv">
-          <div class="dv-header">
-              <div class="dv-header-title">
-                  {{title}}
-              </div>
-              <div class="dv-header-columns">
-                  <span>Search:</span>
-                  <select class="dv-header-select" v-model="query.search_column">
-                      <option v-for="column in columns" :value="column">{{column}}</option>
-                  </select>
-              </div>
-              <div class="dv-header-operators">
-                  <select class="dv-header-select" v-model="query.search_operator">
-                      <option v-for="(value, key) in operators" :value="key">{{value}}</option>
-                  </select>
-              </div>
-              <div class="dv-header-search">
-                  <input type="text" class="dv-header-input"
-                         placeholder="Search"
-                         v-model="query.search_input"
-                         @keyup.enter="fetchIndexData()"/>
-              </div>
-              <div class="dv-header-submit">
-                  <button class="dv-header-btn" @click="fetchIndexData()">Filter</button>
-              </div>
-          </div>
-          <div class="dv-body">
-              <table class="dv-table">
-                  <thead>
-                  <tr>
-                      <th v-for="column in columns" @click="toggleOrder(column)">
-                          <span>{{column}}</span>
-                        <span class="dv-table-column" v-if="column=== query.column">
-                            <span v-if="query.direction === 'desc'">&uarr;</span>
-                            <span v-else>&darr;</span>
-                        </span>
-                      </th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr v-for="row in model.data">
-                      <td v-for="(value,key) in row">{{value}}</td>
-                  </tr>
-                  </tbody>
-              </table>
-          </div>
-          <div class="dv-footer">
-              <div class="dv-footer-item">
-                  <span>Displaying {{model.from}} - {{model.to}} of {{model.total}} rows</span>
-              </div>
-              <div class="dv-footer-item">
-                  <div class="dv-footer-sub">
-                      <span>Rows per page</span>
-                      <input type="text" v-model="query.per_page"
-                             class="dv-footer-input"
-                             @keyup.enter="fetchIndexData()">
-                  </div>
-                  <div class="footer-btn">
-                      <button class="dv-footer-btn" @click="prev()">&laquo;</button>
-                      <input type="text" v-model="query.page"
-                             class="dv-footer-input"
-                             @keyup.enter="fetchIndexData()">
-                      <button class="dv-footer-btn" @click="next()">&raquo;</button>
-                  </div>
-              </div>
-          </div>
-      </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <span class="panel-title">{{title}}</span>
+            <div>
+                <router-link to="customer/create" class="btn btn-primary btn-sm">Create</router-link>
+                <button class="btn btn-default btn-sm" @click="showFilter = !showFilter">F</button>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div class="filter" v-if="showFilter">
+                <div class="filter-column">
+                    <select class="form-control" v-model="params.search_column">
+                        <option v-for="column in filter" :value="column">{{column}}</option>
+                    </select>
+                </div>
+                <div class="filter-operator">
+                    <select class="form-control" v-model="params.search_operator">
+                        <option v-for="(value,key) in operators" :value="key">{{value}}</option>
+                    </select>
+                </div>
+                <div class="filter-input">
+                    <input type="text" class="form-control" v-model="params.search_query_1"
+                    @keyup.enter="fetchData" placeholder="search"/>
+                </div>
+                <div class="filter-input" v-if="params.search_operator === 'between'">
+                    <input type="text" class="form-control" v-model="params.search_query_2"
+                           @keyup.enter="fetchData" placeholder="search"/>
+                </div>
+                <div class="filter-btn">
+                    <button class="btn btn-primary btn-sm btn-block" @click="fetchData()">Filter</button>
+                </div>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th v-for="item in thead">
+                        <div class="dataviewer-th" @click="sort(item.key)" v-if="item.sort">
+                            <span>{{item.title}}</span>
+                            <span v-if="params.column===item.key">
+                                <span v-if="params.direction ==='asc'">&#x25b2;</span>
+                                <span v-else>&#x25BC;</span>
+                            </span>
+                        </div>
+                        <div v-else>
+                            <span>{{item.title}}</span>
+                        </div>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                    <slot v-for="item in model.data" :item="item"></slot>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel-footer pagination-footer">
+            <div class="pagination-item">
+                <span>Per page:</span>
+                <select v-model="params.per_page" @change="fetchData">
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                </select>
+            </div>
+            <div class="pagination-item">
+                <small>Showing {{model.from}} - {{model.to}} of {{model.total}}</small>
+            </div>
+            <div class="pagination-item">
+                <small>Current page:</small>
+                <input type="text" class="pagination-input" v-model="params.page" @keyup.enter="fetchData"/>
+                <small> of {{model.last_page}}</small>
+            </div>
+            <div class="pagination-item">
+                <button @click="prev" class="btn btn-default btn-sm">Prev</button>
+                <button @click="next" class="btn btn-default btn-sm">Next</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
+
     export default {
-        props:['source','title'],
+        props:['source', 'thead','filter','title'],
         data(){
-          return{
-              model:{},
-              columns:{},
-              query:{
-                  page:1,
-                  column:'id',
-                  direction: 'desc',
-                  per_page: 10,
-                  search_column: 'id',
-                  search_operator: 'equal',
-                  search_input:''
-              },
-              operators:{
-                  equal: '=',
-                  not_equal: '<>',
-                  less_than: '<',
-                  greater_than: '>',
-                  less_than_or_equal_to: '<=',
-                  greater_than_or_equal_to: '>=',
-                  in:'IN',
-                  like: 'LIKE'
-              }
-          }
+            return{
+                showFilter:false,
+                model:{
+                    data:[]
+                },
+                params:{
+                    column: 'id',
+                    direction:'desc',
+                    per_page:10,
+                    page:1,
+                    search_column:'id',
+                    search_operator:'equal_to',
+                    search_query_1:'',
+                    search_query_2:''
+                },
+                operators:{
+                    equal_to:'=',
+                    not_equal:'<>',
+                    less_than:'<',
+                    greater_than:'>',
+                    less_than_or_equal_to:'<=',
+                    greater_than_or_equal_to:'>=',
+                    in: 'IN',
+                    not_in:'NOT IN',
+                    like:'LIKE',
+                    between:'BETWEEN'
+                }
+            }
         },
-        created() {
-            this.fetchIndexData()
+        beforeMount(){
+            this.fetchData();
         },
         methods:{
             next(){
-                if(this.model.next_page_url){
-                    this.query.page++
-                    this.fetchIndexData()
-                }
+              if(this.model.next_page_url){
+                  this.params.page++
+                  this.fetchData()
+              }
             },
             prev(){
                 if(this.model.prev_page_url){
-                    this.query.page--
-                    this.fetchIndexData()
+                    this.params.page--
+                    this.fetchData()
                 }
             },
-            toggleOrder(column){
-                if(column === this.query.column) {
-                    //only change direction
-                    if (this.query.direction === 'desc') {
-                        this.query.direction = 'asc'
+            sort(column){
+                if(column === this.params.column){
+                    if(this.params.direction === 'desc'){
+                        this.params.direction = 'asc'
                     } else {
-                        this.query.direction = 'desc'
+                        this.params.direction = 'desc'
                     }
                 }else {
-                    this.query.column = column;
-                    this.query.direction = 'asc'
+                    this.params.column = column
+                    this.params.direction = 'asc'
                 }
-                this.fetchIndexData()
+                this.fetchData()
             },
-            fetchIndexData() {
-                var  vm = this
-                axios.get(`${this.source}?column=${this.query.column}&direction=${this.query.direction}&page=${this.query.page}
-                            &per_page=${this.query.per_page}&search_column=${this.query.search_column}
-                            &search_operator=${this.query.search_operator}&search_input=${this.query.search_input}`)
-                    .then(function (response) {
+            fetchData(){
+                var vm = this
+                axios.get(this.buildURL())
+                    .then(function(response){
                         Vue.set(vm.$data,'model',response.data.model)
-                        Vue.set(vm.$data,'columns',response.data.columns)
                     })
-                    .catch(function (response) {
-                        console.log(response)
+                    .catch(function(error){
+                        console.log(error)
                     })
+            },
+            buildURL(){
+                var p = this.params
+                return `${this.source}?column=${p.column}
+                &direction=${p.direction}
+                &per_page=${p.per_page}
+                &page=${p.page}
+                &search_column=${p.search_column}
+                &search_operator=${p.search_operator}
+                &search_query_1=${p.search_query_1}
+                &search_query_2=${p.search_query_2}`
             }
         }
     }

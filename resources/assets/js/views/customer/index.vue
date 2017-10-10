@@ -13,14 +13,14 @@
 </template>
 
 <script>
-    import DataViewer from '../../components/DataViewer1.vue'
+    import DataViewer from '../../components/DataViewer.vue'
 
     export default {
         name: 'CustomerIndex',
         data(){
             return{
                 title: 'Customers',
-                source: '/api/customers',
+                source: '/api/customer',
                 create: '/customer/create',
                 thead:[
                     {title:'ID', key:'id', sort:true},
@@ -35,7 +35,7 @@
             }
         },
         components:{
-            DataViewer1
+            DataViewer
         }
     }
 </script>

@@ -1,5 +1,6 @@
 <template>
     <div id="app">
+
         <div class="navbar navbar-default">
             <div class="navbar-brand">
                 <router-link to="/">Brand Name</router-link>
