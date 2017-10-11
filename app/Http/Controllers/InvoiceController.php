@@ -35,7 +35,7 @@ class InvoiceController extends Controller
             'customer_id'=> 'required|exists:customers,id',
             'title'=> 'required',
             'date'=> 'required|date_format:Y-m-d',
-            'date_due'=> 'required|date_format:Y-m-d',
+            'due_date'=> 'required|date_format:Y-m-d',
             'discount'=> 'required|numeric|min:0',
             'items' => 'required|array|min:1',
             'items.*.description'=>'required|max:255',
@@ -86,18 +86,21 @@ class InvoiceController extends Controller
         return response()
             ->json([
                 'form' => $invoice,
-                'option' => Customer::orderBy('name')->get()
+                'option' =>[
+                    'customers' => Customer::orderBy('name')->get()
+                ]
             ]);
 
     }
 
     public function update(Request $request, $id)
     {
+
         $this->validate($request,[
             'customer_id'=> 'required|exists:customers,id',
             'title'=> 'required',
             'date'=> 'required|date_format:Y-m-d',
-            'date_due'=> 'required|date_format:Y-m-d',
+            'due_date'=> 'required|date_format:Y-m-d',
             'discount'=> 'required|numeric|min:0',
             'items' => 'required|array|min:1',
             'items.*.description'=>'required|max:255',
@@ -119,6 +122,7 @@ class InvoiceController extends Controller
                 InvoiceItem::whereId($item['id'])
                     ->whereInvoiceId($invoice->id)
                     ->update($item);
+                $itemIds[] = $item['id'];
             }else{
                 $items[] = new InvoiceItem($item);
             }
@@ -126,7 +130,7 @@ class InvoiceController extends Controller
 
         $data['total'] = $data['sub_total'] - $data['discount'];
 
-        $invoice = update($data);
+        $invoice->update($data);
 
         //delete remove items
         if(count($itemIds)){

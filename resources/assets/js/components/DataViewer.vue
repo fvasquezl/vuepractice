@@ -3,7 +3,7 @@
         <div class="panel-heading">
             <span class="panel-title">{{title}}</span>
             <div>
-                <router-link to="customer/create" class="btn btn-primary btn-sm">Create</router-link>
+                <router-link :to="create" class="btn btn-primary btn-sm">Create</router-link>
                 <button class="btn btn-default btn-sm" @click="showFilter = !showFilter">F</button>
             </div>
         </div>
@@ -81,7 +81,7 @@
 <script>
 
     export default {
-        props:['source', 'thead','filter','title'],
+        props:['source', 'thead','filter','create','title'],
         data(){
             return{
                 showFilter:false,

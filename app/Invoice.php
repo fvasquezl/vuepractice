@@ -10,11 +10,11 @@ class Invoice extends Model
     use FilterPaginateOrder;
 
     protected $fillable = [
-        'customer_id','title','date','date_due','discount','sub_total','total'
+        'customer_id','title','date','due_date','discount','sub_total','total'
     ];
 
     protected $filter = [
-        'id','customer_id','title','date','date_due','discount','sub_total','total','created_at',
+        'id','customer_id','title','date','due_date','discount','sub_total','total','created_at',
 
         'customer.id','customer.company','customer.email','customer.name','customer.phone','customer.address','customer.created_at'
     ];
@@ -25,7 +25,7 @@ class Invoice extends Model
             'customer_id'=> 'Select',
             'title'=> 'Invoice for',
             'date'=> date('Y-m-d'),
-            'date_due'=> null,
+            'due_date'=> null,
             'discount'=> 0,
             'items' =>[
                 InvoiceItem::initialize()
